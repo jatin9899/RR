@@ -85,14 +85,6 @@ st.divider()
 with st.sidebar:
     st.markdown("## Configuration")
 
-<<<<<<< HEAD
-    hf_token = st.text_input(
-        "HuggingFace API Token",
-        type="password",
-        value = os.getenv("HF_API_KEY", ""),
-        help="Enter your HuggingFace API token here. It stays local - never sent anywhere except HuggingFace.",
-    )
-=======
     # Read server-side token (if set) but do NOT pre-fill it into the browser field.
     # This prevents the token from appearing in page source or being exposed to users.
     env_hf_token = os.getenv("HF_API_KEY", "")
@@ -104,7 +96,6 @@ with st.sidebar:
     )
     # Use the user input token if provided; otherwise fall back to the server-side token.
     hf_token = hf_token_input.strip() or env_hf_token
->>>>>>> 4456eaa (final_second_commit)
 
     model_choice = st.selectbox(
         "Choose AI Model",
@@ -114,8 +105,6 @@ with st.sidebar:
     )
     st.divider()
 
-<<<<<<< HEAD
-=======
     role_choice = st.selectbox(
         "Target role / Job area",
         options=[
@@ -135,7 +124,6 @@ with st.sidebar:
         role = role_choice
     st.divider()
 
->>>>>>> 4456eaa (final_second_commit)
     # How to get a free token 
     with st.expander(" Free Token kaise banao?"):
         st.markdown("""
@@ -205,9 +193,6 @@ if uploaded_file is not None:
     except Exception as error:
     
             st.error(f"Could not read file: {error}")
-<<<<<<< HEAD
-            st.stop()
-=======
             st.stop()
 
 #------------------------
@@ -331,4 +316,3 @@ if resume_text:
 
 elif uploaded_file is None:
     st.info("📤 Upload your resume above to get started.")        
->>>>>>> 4456eaa (final_second_commit)

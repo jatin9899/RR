@@ -20,14 +20,6 @@ flow:
 import os
 from typing import Optional
 
-<<<<<<< HEAD
-from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain_community.embeddings import HuggingFaceEmbeddings
-from langchain_community.vectorstores import FAISS
-from langchain_huggingface import HuggingFaceEndpoint
-from langchain_chains import RetrievalQA
-from langchain_prompts import PromptTemplate
-=======
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS
@@ -47,7 +39,6 @@ AVAILABLE_MODELS = {
 
 # Public fallback model to use when HF access fails or token is missing
 FALLBACK_MODEL = "google/flan-t5-large"
->>>>>>> 4456eaa (final_second_commit)
 
 # --------------------------------------
 # Prompt Template
@@ -93,16 +84,12 @@ class ResumeRAGPipeline:
         model_name: str = "Mistral 7B Instruct (Recommended)"):
         self.hf_token = hf_token.strip()
         self.model_id = AVAILABLE_MODELS.get(model_name, AVAILABLE_MODELS["Mistral 7B Instruct (Recommended)"])
-<<<<<<< HEAD
-        self._qa_chain = None
-=======
         # If no token provided, force the public fallback model
         if not self.hf_token:
             self.model_id = FALLBACK_MODEL
         self._qa_chain = None
         self._resume_text: Optional[str] = None
         self._use_heuristic = False
->>>>>>> 4456eaa (final_second_commit)
 
 
     #------------BUILD--------------------------------
@@ -117,13 +104,6 @@ class ResumeRAGPipeline:
         documents = splitter.create_documents([resume_text])
 
         # step2 : Embef using local sentence-transformers model (no API calls token needed for this step)
-<<<<<<< HEAD
-        embeddings = HuggingFaceEmbeddings(
-            model_name="sentence-transformers/all-MiniLM-L6-v2",
-            model_kwargs={"device": "cpu"},
-            encode_kwargs={"normalize_embeddings": True},
-            )
-=======
         try:
             embeddings = HuggingFaceEmbeddings(
                 model_name="sentence-transformers/all-MiniLM-L6-v2",
@@ -136,7 +116,6 @@ class ResumeRAGPipeline:
                 "Install with: pip install sentence-transformers faiss-cpu\n"
                 "If you're on Windows and encounter issues installing faiss, see: https://github.com/facebookresearch/faiss/wiki/Installing-Faiss"
             ) from imp_err
->>>>>>> 4456eaa (final_second_commit)
         
         # Step 3 : Create FAISS vector store (in-memory)
         vector_store = FAISS.from_documents(
@@ -148,26 +127,6 @@ class ResumeRAGPipeline:
             search_kwargs={"k": 4}
         )
 
-<<<<<<< HEAD
-        # Step 4 : Initialize the HuggingFace LLM viva Interface API
-        os.environ["HUGGINGFACEHUB_API_TOKEN"] = self.hf_token
-
-        llm = HuggingFaceEndpoint(
-            repo_id=self.model_id,
-            huggingfacehub_api_token=self.hf_token,
-            temperature=0.3,
-            max_new_tokens=600,
-            timeout=180,
-        )
-
-        # Step 5 : Create the RetrievalQA chain
-        self._qa_chain = RetrievalQA.from_chain_type(
-            llm=llm,
-            chain_type = "stuff",
-            retriever=retriever,
-            chain_type_kwargs={"prompt": _PROMPT},
-        )
-=======
         # Step 4 : Initialize the HuggingFace LLM via Interface API
         # If no HF token is provided, fall back to a simple local heuristic
         # responder to avoid calling the remote inference API and hitting
@@ -240,25 +199,12 @@ class ResumeRAGPipeline:
             self._qa_chain = None
         # keep the resume text so we can rebuild using a fallback model if needed
         self._resume_text = resume_text
->>>>>>> 4456eaa (final_second_commit)
 
 
 
 
     #------------QUERIES---------------------
 
-<<<<<<< HEAD
-    def ask(self, question: str) -> str:
-        """
-        Internal helper to run a query through the RAG chain
-        """
-        if self._qa_chain is None:
-            raise RuntimeError("Pipeline not built yet. Call build(resume_text) First.")
-        result = self._qa_chain.run(query=question)
-        return result.get("result", "").strip()
-    
-    def get_rating(self) -> str:
-=======
     def ask(self, question: str, role: Optional[str] = None) -> str:
         """
         Internal helper to run a query through the RAG chain.
@@ -307,7 +253,6 @@ class ResumeRAGPipeline:
         return result_text.strip()
     
     def get_rating(self, role: Optional[str] = None) -> str:
->>>>>>> 4456eaa (final_second_commit)
         """
         Get an overall rating for the resume 
         """
@@ -315,11 +260,6 @@ class ResumeRAGPipeline:
             "Rate this resume on a scale of 1 to 10."
             "Start with 'Score: X/10' on the first line,"
             "then give a 2-3 sentence justification for the score."
-<<<<<<< HEAD
-        )
-    
-    def get_strengths(self) -> str:
-=======
         , role=role)
 
     def _heuristic_answer(self, question: str, resume_text: str, role: Optional[str] = None) -> str:
@@ -370,7 +310,6 @@ class ResumeRAGPipeline:
         return "I couldn't run the remote model. Provide a HuggingFace API token for full AI analysis, or use these quick heuristics."
     
     def get_strengths(self, role: Optional[str] = None) -> str:
->>>>>>> 4456eaa (final_second_commit)
         """
         Get the top 3 strengths of the resume
         """
@@ -378,15 +317,9 @@ class ResumeRAGPipeline:
             "List the top 5 strengths and positive highlights of this resume."
             "Use bullet points. Be specific - mention actual skills,"
             "achievements, and experiences found in the resume."
-<<<<<<< HEAD
-        )
-    
-    def get_weaknesses(self) -> str:
-=======
         , role=role)
     
     def get_weaknesses(self, role: Optional[str] = None) -> str:
->>>>>>> 4456eaa (final_second_commit)
         """
         Get the top 3 weaknesses of the resume
         """
@@ -395,15 +328,9 @@ class ResumeRAGPipeline:
             "List all the gaps, missing sections, vage descriptions,"
             "or areas that need improvement as bullet points."
             "Be honest and critical."
-<<<<<<< HEAD
-        )
-    
-    def get_suggestions(self) -> str:
-=======
         , role=role)
     
     def get_suggestions(self, role: Optional[str] = None) -> str:
->>>>>>> 4456eaa (final_second_commit)
         """
         Get specific suggestions to improve the resume
         """
@@ -411,15 +338,9 @@ class ResumeRAGPipeline:
             "Give 6 specific, actionable suggestions to improve this resume."
             "Number each suggestion 1 tp 6."
             "Be concrete - explain WAHT to add, HOW to rewrite, or WHAT to remove."
-<<<<<<< HEAD
-        )
-    
-    def get_ats_score_feedback(self) -> str:
-=======
         , role=role)
     
     def get_ats_score_feedback(self, role: Optional[str] = None) -> str:
->>>>>>> 4456eaa (final_second_commit)
         """
         Get feedback on the resume's ATS (Applicant Tracking System) score and how to improve it
         """
@@ -428,8 +349,4 @@ class ResumeRAGPipeline:
             "Cover: keywords densitym formatting issues, section headings,"
             "and give 3 specific keywords the candidates should add."
             "Start with 'ATS Score: X/100'."
-<<<<<<< HEAD
-        )
-=======
         , role=role)
->>>>>>> 4456eaa (final_second_commit)
