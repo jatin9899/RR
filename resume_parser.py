@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 """"
+=======
+"""
+>>>>>>> 4456eaa (final_second_commit)
 resume_parser.py
 ----------------
 Extract plain text from a PDF resume file.
@@ -10,7 +14,11 @@ from PyPDF2 import PdfReader
 import docx
 
 def _read_pdf(file) -> str:
+<<<<<<< HEAD
     raw_bytes = uploaded_file.read()
+=======
+    raw_bytes = file.read()
+>>>>>>> 4456eaa (final_second_commit)
     reader = PdfReader(io.BytesIO(raw_bytes))
     pages = []
     for page in reader.pages:
@@ -26,7 +34,11 @@ def _read_pdf(file) -> str:
     return full_text
 
 def _read_docx(file):
+<<<<<<< HEAD
     raw_bytes = uploaded_file.read()
+=======
+    raw_bytes = file.read()
+>>>>>>> 4456eaa (final_second_commit)
     document = docx.Document(io.BytesIO(raw_bytes))
     paragraphs = [para.text for para in document.paragraphs if para.text.strip()]
     full_text = "\n".join(paragraphs).strip()
@@ -38,7 +50,11 @@ def _read_docx(file):
     return full_text
 
 def _read_txt(file):
+<<<<<<< HEAD
     raw_bytes = uploaded_file.read()
+=======
+    raw_bytes = file.read()
+>>>>>>> 4456eaa (final_second_commit)
     full_text = raw_bytes.decode("utf-8", errors="ignore").strip()
     if not full_text:
         raise ValueError("No readable text found in the TXT file.")

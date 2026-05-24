@@ -85,12 +85,26 @@ st.divider()
 with st.sidebar:
     st.markdown("## Configuration")
 
+<<<<<<< HEAD
     hf_token = st.text_input(
         "HuggingFace API Token",
         type="password",
         value = os.getenv("HF_API_KEY", ""),
         help="Enter your HuggingFace API token here. It stays local - never sent anywhere except HuggingFace.",
     )
+=======
+    # Read server-side token (if set) but do NOT pre-fill it into the browser field.
+    # This prevents the token from appearing in page source or being exposed to users.
+    env_hf_token = os.getenv("HF_API_KEY", "")
+    hf_token_input = st.text_input(
+        "HuggingFace API Token",
+        type="password",
+        value = "",
+        help="Paste your HuggingFace API token here (kept hidden). Leave blank to use a server-side token if configured.",
+    )
+    # Use the user input token if provided; otherwise fall back to the server-side token.
+    hf_token = hf_token_input.strip() or env_hf_token
+>>>>>>> 4456eaa (final_second_commit)
 
     model_choice = st.selectbox(
         "Choose AI Model",
@@ -100,6 +114,28 @@ with st.sidebar:
     )
     st.divider()
 
+<<<<<<< HEAD
+=======
+    role_choice = st.selectbox(
+        "Target role / Job area",
+        options=[
+            "Frontend Engineer",
+            "Backend Engineer",
+            "AI Engineer",
+            "Data Scientist",
+            "Product Manager",
+            "Other (custom)",
+        ],
+        index=2,
+        help="Select the role to tailor the resume feedback.",
+    )
+    if role_choice == "Other (custom)":
+        role = st.text_input("Enter custom role", value="")
+    else:
+        role = role_choice
+    st.divider()
+
+>>>>>>> 4456eaa (final_second_commit)
     # How to get a free token 
     with st.expander(" Free Token kaise banao?"):
         st.markdown("""
@@ -169,4 +205,130 @@ if uploaded_file is not None:
     except Exception as error:
     
             st.error(f"Could not read file: {error}")
+<<<<<<< HEAD
             st.stop()
+=======
+            st.stop()
+
+#------------------------
+# Analyze Button
+# ------------------------
+
+if resume_text:
+    st.divider()
+    analyze_btn = st.button(
+        "Analyze Resume",
+        type="primary",
+        use_container_width=True,
+        disabled= not hf_token,
+    )
+
+    if not hf_token:
+        st.warning("Enter your HuggingFace API token in the sidebar to enable analysis.")
+
+    if analyze_btn and hf_token:
+        # -------BUILD RAG PIPELINE--------
+        pipeline = ResumeRAGPipeline(hf_token=hf_token, model_name=model_choice)
+
+        with st.spinner("Buulding RAG pipeline - chunking, embedding,  indexing... (one-time setup)"):
+            try:
+                pipeline.build(resume_text)
+                st.success("RAG pipeline ready!")
+            except Exception as error:
+                st.error(f"pipeline error:{error}")    
+                st.stop()
+
+        st.markdown("## Resume Analysis Report")
+        st.markdown(f"*Model selected: **{pipeline.model_id}** (choice: {model_choice}) | File: **{uploaded_file.name}***")
+        st.divider()
+
+        #------Row 1 : Rating + ATS ---------------
+        # __ Row 1: Rating + ATS __
+        col_rating, col_ats = st.columns(2)
+
+        with col_rating:
+            st.markdown("### ⭐ Overall Rating")
+            with st.spinner("Rating your resume..."):
+                rating_text = pipeline.get_rating(role=role)
+            st.markdown(
+                f"<div class='card'>{rating_text}</div>",
+                unsafe_allow_html=True,
+            )
+
+        with col_ats:
+            st.markdown("### 🖥️ ATS Compatibility")
+            with st.spinner("Checking ATS compatibility..."):
+                ats_text = pipeline.get_ats_score_feedback(role=role)
+            st.markdown(
+                f"<div class='card card-purple'>{ats_text}</div>",
+                unsafe_allow_html=True,
+            )
+
+        st.divider()
+
+        # __ Row 2: Strengths + Weaknesses __
+        col_strong, col_weak = st.columns(2)
+
+        with col_strong:
+            st.markdown("### 💪 Strengths")
+            with st.spinner("Finding strengths..."):
+                strengths_text = pipeline.get_strengths(role=role)
+            st.markdown(
+                f"<div class='card card-green'>{strengths_text}</div>",
+                unsafe_allow_html=True,
+    )
+
+        with col_weak:
+            st.markdown("### ⚠️ What's Missing / Weak Points")
+            with st.spinner("Identifying gaps..."):
+                weaknesses_text = pipeline.get_weaknesses(role=role)
+            st.markdown(
+                f"<div class='card card-red'>{weaknesses_text}</div>",
+                unsafe_allow_html=True,
+    )
+
+        st.divider()
+
+        # __ Row 3: Suggestions (full width) __
+        st.markdown("### 💡 Improvement Suggestions")
+        with st.spinner("Generating personalised suggestions..."):
+            suggestions_text = pipeline.get_suggestions(role=role)
+        st.markdown(
+            f"<div class='card card-orange'>{suggestions_text}</div>",
+            unsafe_allow_html=True,
+)
+
+        st.divider()
+
+        # __ Download full report __
+        full_report = f"""### Resume Analysis Report
+    Model: {model_choice}
+    File: {uploaded_file.name}
+
+    ## Overall Rating
+    {rating_text}
+
+    ## ATS Compatibility
+    {ats_text}
+
+    ## Strengths
+    {strengths_text}
+
+    ## What's Missing / Weak Points
+    {weaknesses_text}
+
+    ## Improvement Suggestions
+    {suggestions_text}
+    """
+
+        st.download_button(
+            label="📄 Download Full Report (.md)",
+            data=full_report,
+            file_name="resume_analysis_report.md",
+            mime="text/markdown",
+            use_container_width=True,
+        )
+
+elif uploaded_file is None:
+    st.info("📤 Upload your resume above to get started.")        
+>>>>>>> 4456eaa (final_second_commit)
